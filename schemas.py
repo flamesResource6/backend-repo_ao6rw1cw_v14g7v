@@ -12,10 +12,9 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
-# Example schemas (replace with your own):
-
+# Example schemas (retain for reference)
 class User(BaseModel):
     """
     Users collection schema
@@ -38,11 +37,23 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Historical event schemas for the app
+class SubtitleCue(BaseModel):
+    start: float = Field(..., ge=0, description="Start time in seconds")
+    end: float = Field(..., ge=0, description="End time in seconds")
+    text: str = Field(..., description="Subtitle text")
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Event(BaseModel):
+    """
+    Paris historical events
+    Collection name: "event"
+    """
+    title: str
+    year: int = Field(..., description="Year of the event (negative for BCE)")
+    date: Optional[str] = Field(None, description="Optional date string, e.g., '1789-07-14'")
+    description: str
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+    images: List[str] = Field(default_factory=list, description="Image URLs")
+    audio_url: Optional[str] = Field(None, description="Narration audio URL (mp3)")
+    subtitles: List[SubtitleCue] = Field(default_factory=list, description="Timed subtitles")
